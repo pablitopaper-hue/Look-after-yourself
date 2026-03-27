@@ -2,113 +2,108 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Analizador de Alimentos</title>
+<title>App Análisis de Alimentos</title>
 
 <style>
-body {
-    font-family: Arial;
-    text-align: center;
-    background-image: url('https://images.unsplash.com/photo-1490818387583-1baba5e638af');
-    background-size: cover;
-}
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        margin: 0;
+        padding: 0;
 
-.container {
-    background: rgba(255,255,255,0.9);
-    padding: 30px;
-    margin: 50px auto;
-    width: 90%;
-    max-width: 500px;
-    border-radius: 15px;
-}
+        /* Fondo vegetal */
+        background-image: url('https://images.unsplash.com/photo-1512621776951-a57141f2eefd');
+        background-size: cover;
+        background-position: center;
+        color: #333;
+    }
 
-.resultado {
-    margin-top: 20px;
-    padding: 15px;
-    border-radius: 10px;
-    font-weight: bold;
-}
+    .container {
+        background: rgba(255,255,255,0.9);
+        padding: 30px;
+        margin: 50px auto;
+        width: 90%;
+        max-width: 500px;
+        border-radius: 15px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    }
 
-.rojo { background: #ff4d4d; color:white;}
-.naranja { background: orange; color:white;}
-.amarillo { background: #ffd54f;}
-.verde { background: #4caf50; color:white;}
+    input {
+        padding: 10px;
+        width: 70%;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+    }
+
+    button {
+        padding: 10px 20px;
+        border: none;
+        background-color: #2e7d32;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .resultado {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 10px;
+        font-weight: bold;
+    }
+
+    .rojo { background-color: #ff4d4d; color: white; }
+    .naranja { background-color: orange; color: white; }
+    .amarillo { background-color: #ffd54f; }
+    .verde { background-color: #66bb6a; color: white; }
 </style>
+
 </head>
 
 <body>
 
 <div class="container">
-    <h2>🥦 Analizador de Alimentos</h2>
+    <h2>🥦 Análisis de Alimentos</h2>
 
-    <input type="text" id="alimento" placeholder="Ej: Coca Cola, Yogur...">
-    <br><br>
+    <input type="text" id="alimento" placeholder="Introduce un alimento">
+    <br>
     <button onclick="analizar()">Analizar</button>
 
     <div id="resultado" class="resultado"></div>
 </div>
 
 <script>
-async function analizar() {
-
-    let nombre = document.getElementById("alimento").value;
+function analizar() {
+    let alimento = document.getElementById("alimento").value.toLowerCase();
     let resultadoDiv = document.getElementById("resultado");
 
-    if (!nombre) {
-        resultadoDiv.innerHTML = "Introduce un alimento";
-        return;
+    let categoria = "";
+    let clase = "";
+
+    // Lógica básica (puedes mejorarla con BEDCA)
+    if (alimento.includes("refresco") || alimento.includes("bolleria") || alimento.includes("ultraprocesado")) {
+        categoria = "🔴 Producto de riesgo: Malo";
+        clase = "rojo";
+
+    } else if (alimento.includes("embutido") || alimento.includes("pizza")) {
+        categoria = "🟠 Producto mediocre";
+        clase = "naranja";
+
+    } else if (alimento.includes("arroz") || alimento.includes("pan")) {
+        categoria = "🟡 Producto limitado: Bueno";
+        clase = "amarillo";
+
+    } else if (alimento.includes("verdura") || alimento.includes("fruta") || alimento.includes("manzana") || alimento.includes("brocoli")) {
+        categoria = "🟢 Sin riesgo: Excelente";
+        clase = "verde";
+
+    } else {
+        categoria = "⚠️ No reconocido (añadir base de datos)";
+        clase = "";
     }
 
-    try {
-        let url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${nombre}&search_simple=1&action=process&json=1`;
-
-        let response = await fetch(url);
-        let data = await response.json();
-
-        if (data.products.length === 0) {
-            resultadoDiv.innerHTML = "No encontrado";
-            return;
-        }
-
-        let producto = data.products[0];
-
-        let nutriscore = producto.nutriscore_grade;
-
-        let texto = "";
-        let clase = "";
-
-        // Convertimos NutriScore a tu sistema
-        switch(nutriscore) {
-            case "e":
-                texto = "🔴 Producto de riesgo: Malo";
-                clase = "rojo";
-                break;
-            case "d":
-                texto = "🟠 Producto mediocre";
-                clase = "naranja";
-                break;
-            case "c":
-                texto = "🟡 Producto limitado: Bueno";
-                clase = "amarillo";
-                break;
-            case "a":
-            case "b":
-                texto = "🟢 Sin riesgo: Excelente";
-                clase = "verde";
-                break;
-            default:
-                texto = "Sin datos suficientes";
-        }
-
-        resultadoDiv.className = "resultado " + clase;
-        resultadoDiv.innerHTML = `
-            <strong>${producto.product_name || "Producto"}</strong><br>
-            NutriScore: ${nutriscore?.toUpperCase() || "N/A"}<br><br>
-            ${texto}
-        `;
-
-    } catch (error) {
-        resultadoDiv.innerHTML = "Error al conectar con la base de datos";
-    }
+    resultadoDiv.className = "resultado " + clase;
+    resultadoDiv.innerHTML = categoria;
 }
 </script>
 
