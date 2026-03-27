@@ -2,148 +2,109 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>App Nutricional PRO</title>
+<title>App Análisis de Alimentos</title>
 
 <style>
-body {
-    font-family: Arial;
-    background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)),
-    url('https://images.unsplash.com/photo-1546069901-ba9599a7e63c') no-repeat center center fixed;
-    background-size: cover;
-}
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        margin: 0;
+        padding: 0;
 
-.container {
-    background: rgba(255,255,255,0.95);
-    max-width: 420px;
-    margin: 30px auto;
-    padding: 20px;
-    border-radius: 15px;
-}
+        /* Fondo vegetal */
+        background-image: url('https://images.unsplash.com/photo-1512621776951-a57141f2eefd');
+        background-size: cover;
+        background-position: center;
+        color: #333;
+    }
 
-input, button {
-    width: 100%;
-    padding: 10px;
-    margin: 5px 0;
-}
+    .container {
+        background: rgba(255,255,255,0.9);
+        padding: 30px;
+        margin: 50px auto;
+        width: 90%;
+        max-width: 500px;
+        border-radius: 15px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    }
 
-.card {
-    background: #f8f8f8;
-    margin-top: 10px;
-    padding: 10px;
-    border-radius: 10px;
-    cursor: pointer;
-}
+    input {
+        padding: 10px;
+        width: 70%;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+    }
 
-.result {
-    margin-top: 15px;
-    padding: 10px;
-    border-radius: 10px;
-    color: white;
-}
+    button {
+        padding: 10px 20px;
+        border: none;
+        background-color: #2e7d32;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+    }
 
-.rojo { background:#e74c3c; }
-.naranja { background:#e67e22; }
-.amarillo { background:#f1c40f; color:black; }
-.verde { background:#2ecc71; }
+    .resultado {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 10px;
+        font-weight: bold;
+    }
 
+    .rojo { background-color: #ff4d4d; color: white; }
+    .naranja { background-color: orange; color: white; }
+    .amarillo { background-color: #ffd54f; }
+    .verde { background-color: #66bb6a; color: white; }
 </style>
+
 </head>
 
 <body>
 
 <div class="container">
+    <h2>🥦 Análisis de Alimentos</h2>
 
-<h2>Analizador PRO</h2>
+    <input type="text" id="alimento" placeholder="Introduce un alimento">
+    <br>
+    <button onclick="analizar()">Analizar</button>
 
-<input id="busqueda" placeholder="Ej: yogur natural">
-<button onclick="buscar()">Buscar</button>
-
-<div id="lista"></div>
-<div id="resultado"></div>
-
+    <div id="resultado" class="resultado"></div>
 </div>
 
 <script>
+function analizar() {
+    let alimento = document.getElementById("alimento").value.toLowerCase();
+    let resultadoDiv = document.getElementById("resultado");
 
-let productos = [];
+    let categoria = "";
+    let clase = "";
 
-// Buscar productos
-async function buscar() {
+    // Lógica básica (puedes mejorarla con BEDCA)
+    if (alimento.includes("refresco") || alimento.includes("bolleria") || alimento.includes("ultraprocesado")) {
+        categoria = "🔴 Producto de riesgo: Malo";
+        clase = "rojo";
 
-    let query = document.getElementById("busqueda").value;
+    } else if (alimento.includes("embutido") || alimento.includes("pizza")) {
+        categoria = "🟠 Producto mediocre";
+        clase = "naranja";
 
-    let url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${query}&search_simple=1&json=1&page_size=5`;
+    } else if (alimento.includes("arroz") || alimento.includes("pan")) {
+        categoria = "🟡 Producto limitado: Bueno";
+        clase = "amarillo";
 
-    let res = await fetch(url);
-    let data = await res.json();
+    } else if (alimento.includes("verdura") || alimento.includes("fruta") || alimento.includes("manzana") || alimento.includes("brocoli")) {
+        categoria = "🟢 Sin riesgo: Excelente";
+        clase = "verde";
 
-    productos = data.products;
+    } else {
+        categoria = "⚠️ No reconocido (añadir base de datos)";
+        clase = "";
+    }
 
-    let lista = document.getElementById("lista");
-    lista.innerHTML = "";
-
-    productos.forEach((p, i) => {
-        lista.innerHTML += `
-            <div class="card" onclick="seleccionar(${i})">
-                <strong>${p.product_name || "Sin nombre"}</strong><br>
-                ${p.brands || ""}
-            </div>
-        `;
-    });
+    resultadoDiv.className = "resultado " + clase;
+    resultadoDiv.innerHTML = categoria;
 }
-
-// Seleccionar producto
-function seleccionar(i) {
-
-    let p = productos[i];
-    let n = p.nutriments || {};
-
-    let datos = {
-        azucar: n.sugars_100g || 0,
-        grasas: n["saturated-fat_100g"] || 0,
-        sal: n.salt_100g || 0,
-        calorias: n.energy_100g || 0
-    };
-
-    let nutriscore = p.nutriscore_grade;
-
-    let evaluacion = evaluar(datos, nutriscore);
-
-    document.getElementById("resultado").innerHTML = `
-        <div class="result ${evaluacion.color}">
-            <h3>${p.product_name}</h3>
-            NutriScore: ${nutriscore || "N/A"}<br>
-            Azúcar: ${datos.azucar}g<br>
-            Grasas sat: ${datos.grasas}g<br>
-            Sal: ${datos.sal}g<br>
-            Calorías: ${datos.calorias} kcal<br><br>
-            <strong>${evaluacion.texto}</strong>
-        </div>
-    `;
-}
-
-// Evaluación inteligente
-function evaluar(d, nutri) {
-
-    // Prioridad a NutriScore
-    if (nutri === "a") return {color:"verde", texto:"Excelente"};
-    if (nutri === "b") return {color:"amarillo", texto:"Bueno"};
-    if (nutri === "c") return {color:"naranja", texto:"Mediocre"};
-    if (nutri === "d" || nutri === "e") return {color:"rojo", texto:"Malo"};
-
-    // Fallback manual
-    let score = 0;
-
-    if (d.azucar > 10) score += 2;
-    if (d.grasas > 5) score += 2;
-    if (d.sal > 1.5) score += 2;
-
-    if (score >= 5) return {color:"rojo", texto:"Malo"};
-    if (score >= 3) return {color:"naranja", texto:"Mediocre"};
-    if (score >= 1) return {color:"amarillo", texto:"Limitado"};
-    return {color:"verde", texto:"Excelente"};
-}
-
 </script>
 
 </body>
