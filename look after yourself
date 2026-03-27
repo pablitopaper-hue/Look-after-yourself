@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>App Análisis de Alimentos</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: url('https://images.unsplash.com/photo-1506806732259-39c2d0268443') no-repeat center center fixed;
+        background-size: cover;
+        color: #333;
+    }
+
+    .container {
+        background: rgba(255,255,255,0.9);
+        padding: 20px;
+        border-radius: 10px;
+        max-width: 900px;
+        margin: 20px auto;
+    }
+
+    h1 {
+        text-align: center;
+    }
+
+    input {
+        width: 100%;
+        margin: 5px 0;
+        padding: 5px;
+    }
+
+    button {
+        padding: 10px;
+        margin-top: 10px;
+        width: 100%;
+        background: green;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+
+    .result {
+        margin-top: 20px;
+        padding: 10px;
+        border-radius: 5px;
+        color: white;
+    }
+
+    .rojo { background: #e74c3c; }
+    .naranja { background: #e67e22; }
+    .amarillo { background: #f1c40f; color:black; }
+    .verde { background: #2ecc71; }
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>Analizador de Alimentos</h1>
+
+    <div id="productos"></div>
+
+    <button onclick="analizar()">Analizar Productos</button>
+
+    <div id="resultados"></div>
+</div>
+
+<script>
+
+// Crear 10 formularios
+const container = document.getElementById("productos");
+
+for (let i = 0; i < 10; i++) {
+    container.innerHTML += `
+        <h3>Producto ${i+1}</h3>
+        <input placeholder="Nombre" id="nombre${i}">
+        <input type="number" placeholder="Sal (g)" id="sal${i}">
+        <input type="number" placeholder="Azúcar (g)" id="azucar${i}">
+        <input type="number" placeholder="Aditivos (cantidad)" id="aditivos${i}">
+        <input type="number" placeholder="Proteínas (g)" id="proteinas${i}">
+        <input type="number" placeholder="Calorías (kcal)" id="calorias${i}">
+        <input type="number" placeholder="Grasas saturadas (g)" id="grasas${i}">
+    `;
+}
+
+// Función de evaluación
+function evaluar(p) {
+
+    let score = 0;
+
+    // Penalizaciones
+    if (p.sal > 1.5) score += 2;
+    else if (p.sal > 0.5) score += 1;
+
+    if (p.azucar > 10) score += 2;
+    else if (p.azucar > 5) score += 1;
+
+    if (p.aditivos > 5) score += 2;
+    else if (p.aditivos > 2) score += 1;
+
+    if (p.grasas > 5) score += 2;
+    else if (p.grasas > 2) score += 1;
+
+    if (p.calorias > 400) score += 2;
+    else if (p.calorias > 200) score += 1;
+
+    // Bonus proteína
+    if (p.proteinas > 10) score -= 1;
+
+    // Clasificación
+    if (score >= 7) return {color:"rojo", texto:"Producto de riesgo"};
+    if (score >= 4) return {color:"naranja", texto:"Mediocre"};
+    if (score >= 2) return {color:"amarillo", texto:"Limitado"};
+    return {color:"verde", texto:"Excelente"};
+}
+
+// Analizar
+function analizar() {
+
+    let resultados = document.getElementById("resultados");
+    resultados.innerHTML = "";
+
+    for (let i = 0; i < 10; i++) {
+
+        let nombre = document.getElementById(`nombre${i}`).value;
+
+        if (!nombre) continue;
+
+        let producto = {
+            sal: parseFloat(document.getElementById(`sal${i}`).value) || 0,
+            azucar: parseFloat(document.getElementById(`azucar${i}`).value) || 0,
+            aditivos: parseFloat(document.getElementById(`aditivos${i}`).value) || 0,
+            proteinas: parseFloat(document.getElementById(`proteinas${i}`).value) || 0,
+            calorias: parseFloat(document.getElementById(`calorias${i}`).value) || 0,
+            grasas: parseFloat(document.getElementById(`grasas${i}`).value) || 0,
+        };
+
+        let evaluacion = evaluar(producto);
+
+        resultados.innerHTML += `
+            <div class="result ${evaluacion.color}">
+                <strong>${nombre}</strong> → ${evaluacion.texto}
+            </div>
+        `;
+    }
+}
+
+</script>
+
+</body>
+</html>
