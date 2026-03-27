@@ -7,15 +7,17 @@
 <style>
     body {
         font-family: Arial, sans-serif;
-        background: url('https://images.unsplash.com/photo-1506806732259-39c2d0268443') no-repeat center center fixed;
+        background: 
+            linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)),
+            url('https://images.unsplash.com/photo-1512621776951-a57141f2eefd') no-repeat center center fixed;
         background-size: cover;
         color: #333;
     }
 
     .container {
-        background: rgba(255,255,255,0.9);
+        background: rgba(255,255,255,0.95);
         padding: 20px;
-        border-radius: 10px;
+        border-radius: 15px;
         max-width: 900px;
         margin: 20px auto;
     }
@@ -69,7 +71,6 @@
 
 <script>
 
-// Crear 10 formularios
 const container = document.getElementById("productos");
 
 for (let i = 0; i < 10; i++) {
@@ -78,19 +79,17 @@ for (let i = 0; i < 10; i++) {
         <input placeholder="Nombre" id="nombre${i}">
         <input type="number" placeholder="Sal (g)" id="sal${i}">
         <input type="number" placeholder="Azúcar (g)" id="azucar${i}">
-        <input type="number" placeholder="Aditivos (cantidad)" id="aditivos${i}">
+        <input type="number" placeholder="Aditivos" id="aditivos${i}">
         <input type="number" placeholder="Proteínas (g)" id="proteinas${i}">
-        <input type="number" placeholder="Calorías (kcal)" id="calorias${i}">
+        <input type="number" placeholder="Calorías" id="calorias${i}">
         <input type="number" placeholder="Grasas saturadas (g)" id="grasas${i}">
     `;
 }
 
-// Función de evaluación
 function evaluar(p) {
 
     let score = 0;
 
-    // Penalizaciones
     if (p.sal > 1.5) score += 2;
     else if (p.sal > 0.5) score += 1;
 
@@ -106,17 +105,14 @@ function evaluar(p) {
     if (p.calorias > 400) score += 2;
     else if (p.calorias > 200) score += 1;
 
-    // Bonus proteína
     if (p.proteinas > 10) score -= 1;
 
-    // Clasificación
     if (score >= 7) return {color:"rojo", texto:"Producto de riesgo"};
     if (score >= 4) return {color:"naranja", texto:"Mediocre"};
     if (score >= 2) return {color:"amarillo", texto:"Limitado"};
     return {color:"verde", texto:"Excelente"};
 }
 
-// Analizar
 function analizar() {
 
     let resultados = document.getElementById("resultados");
